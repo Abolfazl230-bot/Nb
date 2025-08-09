@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ماشین حساب ساده و خفن</title>
+  <style>
+    body {
+      background-color: #1a202c;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+    .calculator {
+      background-color: #2d3748;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+      animation: glow 2s ease-in-out infinite;
+    }
+    @keyframes glow {
+      0% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
+      50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
+      100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
+    }
+    .display {
+      background-color: #000;
+      color: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      text-align: right;
+      font-size: 24px;
+      font-family: monospace;
+    }
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    button {
+      padding: 15px;
+      font-size: 18px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.2s, background-color 0.2s;
+    }
+    button:hover {
+      transform: scale(1.05);
+    }
+    .number { background-color: #4a5568; color: #fff; }
+    .operator { background-color: #ed8936; color: #fff; }
+    .clear { background-color: #f56565; color: #fff; }
+    .equals { background-color: #48bb78; color: #fff; }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="display" id="display">0</div>
+    <div class="buttons">
+      <button class="clear" onclick="clearDisplay()">C</button>
+      <button class="operator" onclick="appendOperator('/')">÷</button>
+      <button class="operator" onclick="appendOperator('*')">×</button>
+      <button class="operator" onclick="appendOperator('-')">−</button>
+      <button class="number" onclick="appendNumber('7')">7</button>
+      <button class="number" onclick="appendNumber('8')">8</button>
+      <button class="number" onclick="appendNumber('9')">9</button>
+      <button class="operator" onclick="appendOperator('+')">+</button>
+      <button class="number" onclick="appendNumber('4')">4</button>
+      <button class="number" onclick="appendNumber('5')">5</button>
+      <button class="number" onclick="appendNumber('6')">6</button>
+      <button class="number" onclick="appendNumber('1')">1</button>
+      <button class="number" onclick="appendNumber('2')">2</button>
+      <button class="number" onclick="appendNumber('3')">3</button>
+      <button class="number" onclick="appendNumber('0')">0</button>
+      <button class="number" onclick="appendNumber('.')">.</button>
+      <button class="equals" onclick="calculate()">=</button>
+    </div>
+  </div>
+  <script>
+    let display = document.getElementById('display');
+    let expression = '';
+
+    function appendNumber(num) {
+      if (display.innerText === '0') {
+        display.innerText = num;
+        expression = num;
+      } else {
+        display.innerText += num;
+        expression += num;
+      }
+    }
+
+    function appendOperator(op) {
+      display.innerText = op;
+      expression += op;
+    }
+
+    function clearDisplay() {
+      display.innerText = '0';
+      expression = '';
+    }
+
+    function calculate() {
+      try {
+        const result = eval(expression);
+        display.innerText = result;
+        expression = result.toString();
+      } catch {
+        display.innerText = 'خطا';
+        expression = '';
+      }
+    }
+  </script>
+</body>
+</html>
