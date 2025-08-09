@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ماشین حساب خفن 🚀</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      transition: background 0.5s ease;
+    }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .welcome-screen, .calc-entry-screen {
+      text-align: center;
+      color: #fff;
+      animation: fadeIn 1s ease-out;
+    }
+    .welcome-screen h1, .calc-entry-screen h1 {
+      font-size: 44px;
+      text-shadow: 0 0 12px rgba(59, 130, 246, 0.9);
+      margin-bottom: 25px;
+    }
+    .welcome-screen button, .calc-entry-screen button {
+      padding: 12px 28px;
+      font-size: 18px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .welcome-screen button:hover, .calc-entry-screen button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.9);
+    }
+    .calculator {
+      background: rgba(17, 24, 39, 0.9);
+      padding: 12px;
+      border-radius: 18px;
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.7);
+      animation: glow 1.5s ease-in-out infinite alternate;
+      max-width: 280px;
+      width: 100%;
+      backdrop-filter: blur(12px);
+      display: none;
+    }
+    .calculator.active { display: block; }
+    @keyframes glow {
+      from { box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
+      to { box-shadow: 0 0 20px rgba(59, 130, 246, 0.9); }
+    }
+    @keyframes buttonPress {
+      0% { transform: scale(1); box-shadow: 0 0 0 rgba(255, 255, 255, 0); }
+      50% { transform: scale(0.9); box-shadow: 0 0 12px rgba(255, 255, 255, 0.6); }
+      100% { transform: scale(1); box-shadow: 0 0 0 rgba(255, 255, 255, 0); }
+    }
+    @keyframes ripple {
+      0% { opacity: 1; transform: scale(0); }
+      100% { opacity: 0; transform: scale(1.5); }
+    }
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(40px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .display {
+      background: #1f2937;
+      color: #fff;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      text-align: right;
+      font-size: 22px;
+      font-family: monospace;
+      overflow-x: auto;
+      white-space: nowrap;
+      box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.4);
+    }
+    .numbers {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+    button {
+      position: relative;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.1s, background-color 0.2s;
+      color: #fff;
+      overflow: hidden;
+    }
+    button:active { animation: buttonPress 0.2s ease-in-out; }
+    button::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      opacity: 0;
+    }
+    button:active::after { animation: ripple 0.5s ease-out; }
+    button:hover { transform: translateY(-1px); box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); }
+    .number { background: linear-gradient(135deg, #4b5563, #374151); }
+    .operator { background: linear-gradient(135deg, #f97316, #ea580c); }
+    .scientific { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    .clear { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    .equals { background: linear-gradient(135deg, #10b981, #059669); }
+    .toggle { background: linear-gradient(135deg, #6b7280, #4b5563); font-size: 14px; }
+    .light-mode .calculator { background: rgba(255, 255, 255, 0.95); }
+    .light-mode .display { background: #e5e7eb; color: #111827; }
+    .light-mode .number { background: linear-gradient(135deg, #9ca3af, #6b7280); color: #111827; }
+    .light-mode .operator { background: linear-gradient(135deg, #ea580c, #c2410c); }
+    .light-mode .scientific { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+    .light-mode .clear { background: linear-gradient(135deg, #dc2626, #b91c1c); }
+    .light-mode .equals { background: linear-gradient(135deg, #059669, #047857); }
+    .light-mode .toggle { background: linear-gradient(135deg, #4b5563, #374151); }
+  </style>
+</head>
+<body>
+  <div class="welcome-screen" id="welcome">
+    <h1>خوش آمدی! 😎✨</h1>
+    <button onclick="showCalcEntry()">بزن بریم 🚀</button>
+  </div>
+  <div class="calc-entry-screen" id="calcEntry" style="display: none;">
+    <h1>ماشین حساب 🧮</h1>
+    <button onclick="showCalculator()">ماشین حساب 🧮</button>
+  </div>
+  <div class="calculator" id="calculator">
+    <div class="display" id="display">0</div>
+    <div class="numbers">
+      <button class="number" onclick="appendNumber('7')">7</button>
+      <button class="number" onclick="appendNumber('8')">8</button>
+      <button class="number" onclick="appendNumber('9')">9</button>
+      <button class="number" onclick="appendNumber('4')">4</button>
+      <button class="number" onclick="appendNumber('5')">5</button>
+      <button class="number" onclick="appendNumber('6')">6</button>
+      <button class="number" onclick="appendNumber('1')">1</button>
+      <button class="number" onclick="appendNumber('2')">2</button>
+      <button class="number" onclick="appendNumber('3')">3</button>
+      <button class="number" onclick="appendNumber('0')">0</button>
+      <button class="number" onclick="appendNumber('.')">.</button>
+      <button class="clear" onclick="clearDisplay()">C</button>
+    </div>
+    <div class="buttons">
+      <button class="toggle" onclick="showCalcEntry()">🧮</button>
+      <button class="toggle" onclick="toggleTheme()">🌙</button>
+      <button class="scientific" onclick="scientific('sqrt')">√</button>
+      <button class="operator" onclick="appendOperator('+')">+</button>
+      <button class="operator" onclick="appendOperator('-')">−</button>
+      <button class="operator" onclick="appendOperator('*')">×</button>
+      <button class="operator" onclick="appendOperator('/')">÷</button>
+      <button class="equals" onclick="calculate()">=</button>
+    </div>
+  </div>
+  <script>
+    const gradientSets = [
+      ['#6b21a8', '#3b82f6', '#14b8a6'],
+      ['#e11d48', '#9d174d', '#6b21a8'],
+      ['#1e3a8a', '#10b981', '#f97316'],
+      ['#8b5cf6', '#ec4899', '#22d3ee'],
+      ['#3b82f6', '#f59e0b', '#ef4444']
+    ];
+
+    function setRandomGradient() {
+      const randomSet = gradientSets[Math.floor(Math.random() * gradientSets.length)];
+      document.body.style.background = `linear-gradient(135deg, ${randomSet[0]}, ${randomSet[1]}, ${randomSet[2]})`;
+      document.body.style.backgroundSize = '200% 200%';
+      document.body.style.animation = 'gradientShift 12s ease infinite';
+    }
+
+    setRandomGradient();
+
+    let expression = '';
+    let isResult = false;
+    let isDarkMode = true;
+    const welcome = document.getElementById('welcome');
+    const calcEntry = document.getElementById('calcEntry');
+    const calculator = document.getElementById('calculator');
+    const display = document.getElementById('display');
+
+    function showCalcEntry() {
+      welcome.style.display = 'none';
+      calcEntry.style.display = 'block';
+      calcEntry.style.animation = 'fadeIn 0.6s ease-out';
+      setRandomGradient();
+    }
+
+    function showCalculator() {
+      calcEntry.style.display = 'none';
+      calculator.classList.add('active');
+      calculator.style.animation = 'fadeIn 0.6s ease-out';
+      setRandomGradient();
+    }
+
+    function showCalcEntryFromCalc() {
+      calculator.classList.remove('active');
+      calcEntry.style.display = 'block';
+      calcEntry.style.animation = 'fadeIn 0.6s ease-out';
+      setRandomGradient();
+    }
+
+    function appendNumber(num) {
+      if (isResult) {
+        display.innerText = num;
+        expression = num;
+        isResult = false;
+      } else {
+        display.innerText = display.innerText === '0' ? num : display.innerText + num;
+        expression += num;
+      }
+    }
+
+    function appendOperator(op) {
+      if (isResult) {
+        expression = display.innerText + op;
+        isResult = false;
+      } else {
+        expression += op;
+      }
+      display.innerText = op;
+    }
+
+    function clearDisplay() {
+      display.innerText = '0';
+      expression = '';
+      isResult = false;
+    }
+
+    function calculate() {
+      try {
+        const result = eval(expression);
+        display.innerText = Number(result.toFixed(4));
+        expression = result.toString();
+        isResult = true;
+      } catch {
+        display.innerText = 'خطا';
+        expression = '';
+        isResult = true;
+      }
+    }
+
+    function scientific(func) {
+      try {
+        const num = parseFloat(display.innerText);
+        let result;
+        switch (func) {
+          case 'sqrt': result = Math.sqrt(num).toFixed(4); break;
+          default: result = num;
+        }
+        display.innerText = result;
+        expression = result.toString();
+        isResult = true;
+      } catch {
+        display.innerText = 'خطا';
+        expression = '';
+        isResult = true;
+      }
+    }
+
+    function toggleTheme() {
+      isDarkMode = !isDarkMode;
+      setRandomGradient();
+      calculator.classList.toggle('light-mode', !isDarkMode);
+      document.querySelectorAll('.toggle')[1].innerText = isDarkMode ? '🌙' : '🌞';
+    }
+  </script>
+</body>
+</html>
