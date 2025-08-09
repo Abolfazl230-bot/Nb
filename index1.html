@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ماشین حساب فوق پیشرفته و خفن</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #1e3a8a, #1e1e2e);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      transition: background 0.5s ease;
+    }
+    .calculator {
+      background: rgba(31, 41, 55, 0.95);
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.7);
+      animation: glow 2s ease-in-out infinite;
+      max-width: 360px;
+      width: 100%;
+      backdrop-filter: blur(10px);
+    }
+    @keyframes glow {
+      0% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
+      50% { box-shadow: 0 0 25px rgba(59, 130, 246, 0.9); }
+      100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
+    }
+    @keyframes buttonPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+    @keyframes slideIn {
+      0% { opacity: 0; transform: translateY(50px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .calculator.slide-in { animation: slideIn 0.7s ease-out; }
+    .display {
+      background: #111827;
+      color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      text-align: right;
+      font-size: 28px;
+      font-family: monospace;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+    .history {
+      background: rgba(55, 65, 81, 0.9);
+      color: #fff;
+      padding: 10px;
+      border-radius: 10px;
+      max-height: 150px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+      display: none;
+    }
+    .history.show { display: block; }
+    .history-item { padding: 5px; border-radius: 5px; margin: 5px 0; }
+    .history-item:hover { background: rgba(59, 130, 246, 0.2); }
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    button {
+      padding: 15px;
+      font-size: 18px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.2s, background-color 0.2s;
+      color: #fff;
+    }
+    button:hover { animation: buttonPulse 0.3s ease-in-out; }
+    .number { background: #4b5563; }
+    .operator { background: #f97316; }
+    .scientific { background: #3b82f6; }
+    .clear { background: #ef4444; }
+    .equals { background: #10b981; }
+    .toggle { background: #6b7280; }
+    .light-mode .calculator { background: rgba(255, 255, 255, 0.95); }
+    .light-mode .display { background: #e5e7eb; color: #111827; }
+    .light-mode .history { background: rgba(229, 231, 235, 0.9); color: #111827; }
+    .light-mode .number { background: #9ca3af; color: #111827; }
+    .light-mode .operator { background: #ea580c; }
+    .light-mode .scientific { background: #2563eb; }
+    .light-mode .clear { background: #dc2626; }
+    .light-mode .equals { background: #059669; }
+    .light-mode .toggle { background: #4b5563; }
+  </style>
+</head>
+<body>
+  <div class="calculator slide-in">
+    <div class="display" id="display">0</div>
+    <div class="history" id="history"></div>
+    <div class="buttons">
+      <button class="toggle" onclick="toggleTheme()">🌙</button>
+      <button class="toggle" onclick="toggleHistory()">📜</button>
+      <button class="clear" onclick="clearDisplay()">C</button>
+      <button class="scientific" onclick="scientific('sqrt')">√</button>
+      <button class="scientific" onclick="scientific('pow')">x²</button>
+      <button class="scientific" onclick="scientific('sin')">sin</button>
+      <button class="scientific" onclick="scientific('cos')">cos</button>
+      <button class="scientific" onclick="scientific('tan')">tan</button>
+      <button class="scientific" onclick="scientific('log')">log</button>
+      <button class="scientific" onclick="scientific('exp')">exp</button>
+      <button class="number" onclick="appendNumber('7')">7</button>
+      <button class="number" onclick="appendNumber('8')">8</button>
+      <button class="number" onclick="appendNumber('9')">9</button>
+      <button class="operator" onclick="appendOperator('/')">÷</button>
+      <button class="number" onclick="appendNumber('4')">4</button>
+      <button class="number" onclick="appendNumber('5')">5</button>
+      <button class="number" onclick="appendNumber('6')">6</button>
+      <button class="operator" onclick="appendOperator('*')">×</button>
+      <button class="number" onclick="appendNumber('1')">1</button>
+      <button class="number" onclick="appendNumber('2')">2</button>
+      <button class="number" onclick="appendNumber('3')">3</button>
+      <button class="operator" onclick="appendOperator('-')">−</button>
+      <button class="number" onclick="appendNumber('0')">0</button>
+      <button class="number" onclick="appendNumber('.')">.</button>
+      <button class="equals" onclick="calculate()">=</button>
+      <button class="operator" onclick="appendOperator('+')">+</button>
+    </div>
+  </div>
+  <script>
+    let expression = '';
+    let isResult = false;
+    let history = [];
+    let isDarkMode = true;
+    const display = document.getElementById('display');
+    const historyDiv = document.getElementById('history');
+    const calculator = document.querySelector('.calculator');
+    const body = document.body;
+
+    function appendNumber(num) {
+      if (isResult) {
+        display.innerText = num;
+        expression = num;
+        isResult = false;
+      } else {
+        display.innerText = display.innerText === '0' ? num : display.innerText + num;
+        expression += num;
+      }
+    }
+
+    function appendOperator(op) {
+      if (isResult) {
+        expression = display.innerText + op;
+        isResult = false;
+      } else {
+        expression += op;
+      }
+      display.innerText = op;
+    }
+
+    function clearDisplay() {
+      display.innerText = '0';
+      expression = '';
+      isResult = false;
+    }
+
+    function calculate() {
+      try {
+        const result = eval(expression);
+        display.innerText = result;
+        expression = result.toString();
+        history.push(`${expression} = ${result}`);
+        updateHistory();
+        isResult = true;
+      } catch {
+        display.innerText = 'خطا';
+        expression = '';
+        isResult = true;
+      }
+    }
+
+    function scientific(func) {
+      try {
+        const num = parseFloat(display.innerText);
+        let result;
+        switch (func) {
+          case 'sin': result = Math.sin((num * Math.PI) / 180).toFixed(4); break;
+          case 'cos': result = Math.cos((num * Math.PI) / 180).toFixed(4); break;
+          case 'tan': result = Math.tan((num * Math.PI) / 180).toFixed(4); break;
+          case 'sqrt': result = Math.sqrt(num).toFixed(4); break;
+          case 'pow': result = Math.pow(num, 2).toFixed(4); break;
+          case 'log': result = Math.log10(num).toFixed(4); break;
+          case 'exp': result = Math.exp(num).toFixed(4); break;
+          default: result = num;
+        }
+        display.innerText = result;
+        expression = result.toString();
+        history.push(`${func}(${num}) = ${result}`);
+        updateHistory();
+        isResult = true;
+      } catch {
+        display.innerText = 'خطا';
+        expression = '';
+        isResult = true;
+      }
+    }
+
+    function updateHistory() {
+      historyDiv.innerHTML = history.length > 0 
+        ? history.map(item => `<div class="history-item">${item}</div>`).join('')
+        : '<div class="history-item">بدون تاریخچه</div>';
+    }
+
+    function toggleTheme() {
+      isDarkMode = !isDarkMode;
+      body.style.background = isDarkMode 
+        ? 'linear-gradient(135deg, #1e3a8a, #1e1e2e)'
+        : 'linear-gradient(135deg, #bfdbfe, #f3f4f6)';
+      calculator.classList.toggle('light-mode', !isDarkMode);
+      document.querySelector('.toggle').innerText = isDarkMode ? '🌙' : '🌞';
+    }
+
+    function toggleHistory() {
+      historyDiv.classList.toggle('show');
+    }
+  </script>
+</body>
+</html>
