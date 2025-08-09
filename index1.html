@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ماشین حساب فوق خفن 🚀</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #1e40af, #1e1e2e);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      transition: background 0.5s ease;
+    }
+    .welcome-screen {
+      text-align: center;
+      color: #fff;
+      animation: fadeIn 1s ease-out;
+    }
+    .welcome-screen h1 {
+      font-size: 48px;
+      text-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
+      margin-bottom: 20px;
+    }
+    .welcome-screen button {
+      padding: 15px 30px;
+      font-size: 20px;
+      border: none;
+      border-radius: 15px;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .welcome-screen button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+    }
+    .calculator {
+      background: rgba(17, 24, 39, 0.95);
+      padding: 15px;
+      border-radius: 20px;
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.7);
+      animation: glow 1.5s ease-in-out infinite alternate;
+      max-width: 320px;
+      width: 100%;
+      backdrop-filter: blur(10px);
+      display: none;
+    }
+    .calculator.active { display: block; }
+    @keyframes glow {
+      from { box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
+      to { box-shadow: 0 0 20px rgba(59, 130, 246, 0.9); }
+    }
+    @keyframes buttonPress {
+      0% { transform: scale(1); box-shadow: 0 0 0 rgba(255, 255, 255, 0); }
+      50% { transform: scale(0.92); box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
+      100% { transform: scale(1); box-shadow: 0 0 0 rgba(255, 255, 255, 0); }
+    }
+    @keyframes ripple {
+      0% { opacity: 1; transform: scale(0); }
+      100% { opacity: 0; transform: scale(1.5); }
+    }
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(50px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .display {
+      background: #1f2937;
+      color: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      text-align: right;
+      font-size: 24px;
+      font-family: monospace;
+      overflow-x: auto;
+      white-space: nowrap;
+      box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.4);
+    }
+    .history {
+      background: rgba(55, 65, 81, 0.9);
+      color: #fff;
+      padding: 10px;
+      border-radius: 10px;
+      max-height: 100px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+      display: none;
+      font-size: 13px;
+    }
+    .history.show { display: block; }
+    .history-item { padding: 4px; border-radius: 5px; margin: 3px 0; background: rgba(255, 255, 255, 0.1); transition: background 0.2s; }
+    .history-item:hover { background: rgba(59, 130, 246, 0.3); }
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .numbers {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    button {
+      position: relative;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.1s, background-color 0.2s;
+      color: #fff;
+      overflow: hidden;
+    }
+    button:active { animation: buttonPress 0.2s ease-in-out; }
+    button::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      opacity: 0;
+    }
+    button:active::after { animation: ripple 0.5s ease-out; }
+    button:hover { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); }
+    .number { background: linear-gradient(135deg, #4b5563, #374151); }
+    .operator { background: linear-gradient(135deg, #f97316, #ea580c); }
+    .scientific { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    .clear { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    .equals { background: linear-gradient(135deg, #10b981, #059669); }
+    .toggle { background: linear-gradient(135deg, #6b7280, #4b5563); font-size: 14px; }
+    .memory { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+    .light-mode .calculator { background: rgba(255, 255, 255, 0.95); }
+    .light-mode .display { background: #e5e7eb; color: #111827; }
+    .light-mode .history { background: rgba(229, 231, 235, 0.9); color: #111827; }
+    .light-mode .history-item { background: rgba(0, 0, 0, 0.05); }
+    .light-mode .history-item:hover { background: rgba(59, 130, 246, 0.1); }
+    .light-mode .number { background: linear-gradient(135deg, #9ca3af, #6b7280); color: #111827; }
+    .light-mode .operator { background: linear-gradient(135deg, #ea580c, #c2410c); }
+    .light-mode .scientific { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+    .light-mode .clear { background: linear-gradient(135deg, #dc2626, #b91c1c); }
+    .light-mode .equals { background: linear-gradient(135deg, #059669, #047857); }
+    .light-mode .toggle { background: linear-gradient(135deg, #4b5563, #374151); }
+    .light-mode .memory { background: linear-gradient(135deg, #7c3aed, #6d28d9); }
+  </style>
+</head>
+<body>
+  <div class="welcome-screen" id="welcome">
+    <h1>خوش آمدی! 😎✨</h1>
+    <button onclick="showCalculator()">بزن بریم 🚀</button>
+  </div>
+  <div class="calculator" id="calculator">
+    <div class="display" id="display">0</div>
+    <div class="history" id="history"></div>
+    <button class="toggle" onclick="showWelcome()">🧮</button>
+    <div class="numbers">
+      <button class="number" onclick="appendNumber('7')">7</button>
+      <button class="number" onclick="appendNumber('8')">8</button>
+      <button class="number" onclick="appendNumber('9')">9</button>
+      <button class="number" onclick="appendNumber('4')">4</button>
+      <button class="number" onclick="appendNumber('5')">5</button>
+      <button class="number" onclick="appendNumber('6')">6</button>
+      <button class="number" onclick="appendNumber('1')">1</button>
+      <button class="number" onclick="appendNumber('2')">2</button>
+      <button class="number" onclick="appendNumber('3')">3</button>
+      <button class="number" onclick="appendNumber('0')">0</button>
+      <button class="number" onclick="appendNumber('.')">.</button>
+    </div>
+    <div class="buttons">
+      <button class="toggle" onclick="toggleTheme()">🌙</button>
+      <button class="toggle" onclick="toggleHistory()">📜</button>
+      <button class="memory" onclick="memoryStore()">MS</button>
+      <button class="memory" onclick="memoryRecall()">MR</button>
+      <button class="clear" onclick="clearDisplay()">C</button>
+      <button class="scientific" onclick="scientific('sqrt')">√</button>
+      <button class="scientific" onclick="scientific('pow')">x²</button>
+      <button class="scientific" onclick="scientific('sin')">sin</button>
+      <button class="scientific" onclick="scientific('cos')">cos</button>
+      <button class="operator" onclick="appendOperator('/')">÷</button>
+      <button class="scientific" onclick="scientific('pi')">π</button>
+      <button class="scientific" onclick="scientific('e')">e</button>
+      <button class="scientific" onclick="scientific('percent')">%</button>
+      <button class="operator" onclick="appendOperator('*')">×</button>
+      <button class="operator" onclick="appendOperator('-')">−</button>
+      <button class="operator" onclick="appendOperator('+')">+</button>
+      <button class="scientific" onclick="backspace()">←</button>
+      <button class="equals" onclick="calculate()">=</button>
+    </div>
+  </div>
+  <script>
+    let expression = '';
+    let isResult = false;
+    let history = [];
+    let memory = 0;
+    let isDarkMode = true;
+    const welcome = document.getElementById('welcome');
+    const calculator = document.getElementById('calculator');
+    const display = document.getElementById('display');
+    const historyDiv = document.getElementById('history');
+
+    function showCalculator() {
+      welcome.style.display = 'none';
+      calculator.classList.add('active');
+      calculator.style.animation = 'fadeIn 0.6s ease-out';
+    }
+
+    function showWelcome() {
+      calculator.classList.remove('active');
+      welcome.style.display = 'block';
+      welcome.style.animation = 'fadeIn 0.6s ease-out';
+    }
+
+    function appendNumber(num) {
+      if (isResult) {
+        display.innerText = num;
+        expression = num;
+        isResult = false;
+      } else {
+        display.innerText = display.innerText === '0' ? num : display.innerText + num;
+        expression += num;
+      }
+    }
+
+    function appendOperator(op) {
+      if (isResult) {
+        expression = display.innerText + op;
+        isResult = false;
+      } else {
+        expression += op;
+      }
+      display.innerText = op;
+    }
+
+    function clearDisplay() {
+      display.innerText = '0';
+      expression = '';
+      isResult = false;
+    }
+
+    function backspace() {
+      if (display.innerText.length > 1) {
+        display.innerText = display.innerText.slice(0, -1);
+        expression = expression.slice(0, -1);
+      } else {
+        clearDisplay();
+      }
+    }
+
+    function calculate() {
+      try {
+        const result = eval(expression);
+        display.innerText = Number(result.toFixed(4));
+        history.push(`${expression} = ${result}`);
+        updateHistory();
+        expression = result.toString();
+        isResult = true;
+      } catch {
+        display.innerText = 'خطا';
+        expression = '';
+        isResult = true;
+      }
+    }
+
+    function scientific(func) {
+      try {
+        const num = parseFloat(display.innerText);
+        let result;
+        switch (func) {
+          case 'sin': result = Math.sin((num * Math.PI) / 180).toFixed(4); break;
+          case 'cos': result = Math.cos((num * Math.PI) / 180).toFixed(4); break;
+          case 'sqrt': result = Math.sqrt(num).toFixed(4); break;
+          case 'pow': result = Math.pow(num, 2).toFixed(4); break;
+          case 'percent': result = num / 100; break;
+          case 'pi': result = Math.PI.toFixed(4); break;
+          case 'e': result = Math.E.toFixed(4); break;
+          default: result = num;
+        }
+        display.innerText = result;
+        expression = result.toString();
+        history.push(`${func}(${num || ''}) = ${result}`);
+        updateHistory();
+        isResult = true;
+      } catch {
+        display.innerText = 'خطا';
+        expression = '';
+        isResult = true;
+      }
+    }
+
+    function memoryStore() {
+      memory = parseFloat(display.innerText);
+      history.push(`MS: ${memory}`);
+      updateHistory();
+    }
+
+    function memoryRecall() {
+      display.innerText = memory.toString();
+      expression = memory.toString();
+      isResult = false;
+    }
+
+    function updateHistory() {
+      historyDiv.innerHTML = history.length > 0 
+        ? history.map(item => `<div class="history-item">${item}</div>`).join('')
+        : '<div class="history-item">بدون تاریخچه</div>';
+    }
+
+    function toggleTheme() {
+      isDarkMode = !isDarkMode;
+      document.body.style.background = isDarkMode 
+        ? 'linear-gradient(135deg, #1e40af, #1e1e2e)'
+        : 'linear-gradient(135deg, #bfdbfe, #f3f4f6)';
+      calculator.classList.toggle('light-mode', !isDarkMode);
+      document.querySelectorAll('.toggle')[0].innerText = isDarkMode ? '🌙' : '🌞';
+    }
+
+    function toggleHistory() {
+      historyDiv.classList.toggle('show');
+    }
+  </script>
+</body>
+</html>
