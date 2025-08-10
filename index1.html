@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>ماشین حساب 🚀</title>
+<style>
+  :root{
+    --bg1:#050417;
+    --bg2:#071032;
+    --card: rgba(17,24,39,0.75);
+    --glass: rgba(255,255,255,0.06);
+    --accent1: #7c3aed;
+    --accent2: #06b6d4;
+    --accent3: #f97316;
+    --text:#e6eef8;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family: "Vazirmatn", -apple-system,BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;}
+  body{
+    background: radial-gradient(1200px 600px at 10% 10%, rgba(10,16,48,0.6), transparent),
+                radial-gradient(800px 500px at 90% 80%, rgba(2,6,23,0.5), transparent),
+                linear-gradient(180deg,var(--bg1),var(--bg2));
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--text);
+    overflow:hidden;
+  }
+
+  .sky{position:fixed; inset:0; z-index:0; pointer-events:none;}
+  .moon{
+    position:absolute;
+    left:50%;
+    top:12%;
+    transform:translateX(-50%);
+    font-size:120px;
+    filter:drop-shadow(0 10px 30px rgba(0,0,0,0.6));
+    animation:moonFloat 7s ease-in-out infinite;
+  }
+  @keyframes moonFloat{
+    0% { transform: translate(-50%, 0) rotate(-3deg); }
+    50% { transform: translate(-50%, -22px) rotate(3deg); }
+    100% { transform: translate(-50%, 0) rotate(-3deg); }
+  }
+  .stars{position:absolute; inset:0;}
+  .star{
+    position:absolute;
+    color:#fff;
+    text-shadow:0 0 8px rgba(255,255,255,0.6);
+    animation:twinkle linear infinite;
+  }
+  @keyframes twinkle{
+    0%,100% { opacity:0.9; transform:scale(1); }
+    50% { opacity:0.3; transform:scale(1.3); }
+  }
+  .particle{
+    position:absolute;
+    font-size:20px;
+    animation:particleMove linear infinite;
+    text-shadow:0 6px 18px rgba(0,0,0,0.5);
+  }
+  @keyframes particleMove{
+    0% { transform: translateY(0) translateX(0) rotate(0deg); opacity:1; }
+    100% { transform: translateY(-120vh) translateX(40vw) rotate(360deg); opacity:0; }
+  }
+
+  .app{
+    position:relative;
+    z-index:5;
+    width:min(420px,92vw);
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    border-radius:18px;
+    padding:20px;
+    box-shadow: 0 10px 40px rgba(2,6,23,0.6);
+    backdrop-filter: blur(8px) saturate(110%);
+    border:1px solid rgba(255,255,255,0.04);
+  }
+  .header{display:flex;justify-content:space-between;align-items:center;}
+  .logo{
+    width:56px;height:56px;border-radius:12px;
+    background:linear-gradient(135deg,var(--accent1),var(--accent2));
+    display:flex;align-items:center;justify-content:center;
+    font-size:26px;
+  }
+  .display{
+    background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));
+    border-radius:12px;padding:12px;font-family:"Courier New",monospace;
+    font-size:28px;text-align:right;min-height:62px;
+    box-shadow:inset 0 -8px 28px rgba(0,0,0,0.5);
+    margin-top:10px;white-space:nowrap;overflow:auto;
+  }
+  .pad{margin-top:12px;display:grid;gap:8px;grid-template-columns:repeat(4,1fr);}
+  button.key{
+    padding:14px;border-radius:10px;font-size:16px;border:none;cursor:pointer;
+    background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));
+    color:var(--text);box-shadow:0 6px 18px rgba(2,6,23,0.5);
+  }
+  .op{background:linear-gradient(135deg,var(--accent3),#ef4444);color:#fff;}
+  .eq{background:linear-gradient(135deg,#10b981,#059669);color:#fff;grid-column:span 2;}
+  .clear{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;}
+  .secondary{background:linear-gradient(135deg,#374151,#4b5563);color:#fff;}
+  .version-badge{
+    position:fixed;right:12px;bottom:10px;
+    font-size:13px;padding:6px 10px;border-radius:10px;
+    background:linear-gradient(90deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01));
+    border:1px solid rgba(255,255,255,0.03);
+  }
+</style>
+</head>
+<body>
+<div class="sky">
+  <div class="stars" id="stars"></div>
+  <div class="moon" id="moon">🌙</div>
+  <div id="particles"></div>
+</div>
+
+<main class="app">
+  <header class="header">
+    <div class="logo">😎</div>
+    <h2>ماشین حساب خفن</h2>
+  </header>
+  <section class="display" id="display">0</section>
+  <section class="pad">
+    <button class="key secondary" data-action="clear">C</button>
+    <button class="key secondary" data-action="del">⌫</button>
+    <button class="key secondary" data-func="sqrt">√</button>
+    <button class="key op" data-op="/">÷</button>
+    <button class="key" data-num="7">7</button>
+    <button class="key" data-num="8">8</button>
+    <button class="key" data-num="9">9</button>
+    <button class="key op" data-op="*">×</button>
+    <button class="key" data-num="4">4</button>
+    <button class="key" data-num="5">5</button>
+    <button class="key" data-num="6">6</button>
+    <button class="key op" data-op="-">−</button>
+    <button class="key" data-num="1">1</button>
+    <button class="key" data-num="2">2</button>
+    <button class="key" data-num="3">3</button>
+    <button class="key op" data-op="+">+</button>
+    <button class="key" data-num="0" style="grid-column: span 2;">0</button>
+    <button class="key" data-num=".">.</button>
+    <button class="key eq" data-action="equals">=</button>
+  </section>
+</main>
+
+<div class="version-badge" id="versionBadge">v1.6</div>
+
+<script>
+const display=document.getElementById('display');
+let expr='',isResult=false;
+function updateDisplay(){display.textContent=expr||'0';}
+function appendNumber(n){if(isResult){expr=n;isResult=false;}else expr+=n;updateDisplay();}
+function appendOperator(o){if(expr && !/[+\-*/]$/.test(expr)){expr+=o;isResult=false;updateDisplay();}}
+function clearAll(){expr='';isResult=false;updateDisplay();}
+function deleteLast(){expr=expr.slice(0,-1);updateDisplay();}
+function doSqrt(){try{expr=String(Math.sqrt(eval(expr||0)));isResult=true;}catch{expr='خطا';isResult=true;}updateDisplay();}
+function calculate(){try{expr=String(eval(expr));isResult=true;}catch{expr='خطا';isResult=true;}updateDisplay();}
+document.querySelectorAll('button.key').forEach(b=>{
+  b.onclick=()=>{
+    if(b.dataset.num!==undefined)appendNumber(b.dataset.num);
+    if(b.dataset.op!==undefined)appendOperator(b.dataset.op);
+    if(b.dataset.action==='clear')clearAll();
+    if(b.dataset.action==='del')deleteLast();
+    if(b.dataset.action==='equals')calculate();
+    if(b.dataset.func==='sqrt')doSqrt();
+  };
+});
+updateDisplay();
+
+// stars
+const stars=document.getElementById('stars');
+for(let i=0;i<25;i++){
+  let s=document.createElement('div');
+  s.className='star';
+  s.textContent=Math.random()>0.5?'✦':'✨';
+  s.style.left=Math.random()*100+'%';
+  s.style.top=Math.random()*100+'%';
+  s.style.fontSize=(8+Math.random()*12)+'px';
+  s.style.animationDuration=(2+Math.random()*4)+'s';
+  stars.appendChild(s);
+}
+// particles
+const parts=document.getElementById('particles'),emojis=['✨','⭐','🌟','💫','☄️'];
+for(let i=0;i<10;i++){
+  let p=document.createElement('div');
+  p.className='particle';
+  p.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+  p.style.left=Math.random()*100+'%';
+  p.style.bottom=(-20-Math.random()*40)+'px';
+  p.style.fontSize=(14+Math.random()*16)+'px';
+  p.style.animationDuration=(8+Math.random()*10)+'s';
+  p.style.animationDelay=(Math.random()*-10)+'s';
+  parts.appendChild(p);
+}
+</script>
+</body>
+</html>
